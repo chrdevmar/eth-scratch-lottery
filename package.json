@@ -1,0 +1,28 @@
+{
+  "name": "eth-scratch-lottery",
+  "version": "1.0.0",
+  "description": "scratch lottery game for the ethereum blockchain",
+  "main": "index.js",
+  "scripts": {
+    "test": "npx truffle test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/ScaredIbis/eth-scratch-lottery.git"
+  },
+  "keywords": [
+    "ethereum",
+    "blockchain",
+    "dapp",
+    "eth"
+  ],
+  "author": "Chris Martin",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ScaredIbis/eth-scratch-lottery/issues"
+  },
+  "homepage": "https://github.com/ScaredIbis/eth-scratch-lottery#readme",
+  "devDependencies": {
+    "truffle": "^5.0.21"
+  }
+}

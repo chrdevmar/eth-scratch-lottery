@@ -1,0 +1,321 @@
+{
+  "contractName": "ScratchLottery",
+  "abi": [
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "ticketPrice",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "prize",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "metadata": "{\"compiler\":{\"version\":\"0.5.8+commit.23d335f2\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"constant\":true,\"inputs\":[],\"name\":\"ticketPrice\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"prize\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"methods\":{},\"title\":\"Scratch Lottery \"},\"userdoc\":{\"methods\":{}}},\"settings\":{\"compilationTarget\":{\"/home/chris/crunchy/eth-scratch-lottery/contracts/ScratchLottery.sol\":\"ScratchLottery\"},\"evmVersion\":\"petersburg\",\"libraries\":{},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"/home/chris/crunchy/eth-scratch-lottery/contracts/ScratchLottery.sol\":{\"keccak256\":\"0x5452510351cccf412522d55114254ce68aa1b439e2d36563aff24ea16b684c5c\",\"urls\":[\"bzzr://8aa141f53b47eb6ecf5afa3edc1162205c83dc915eadf1e628ea89270157186a\"]}},\"version\":1}",
+  "bytecode": "0x608060405266038d7ea4c6800060005567016345785d8a000060015534801561002757600080fd5b5060a7806100366000396000f3fe6080604052348015600f57600080fd5b506004361060325760003560e01c80631209b1f6146037578063e3ac5d26146053575b600080fd5b603d606f565b6040518082815260200191505060405180910390f35b60596075565b6040518082815260200191505060405180910390f35b60005481565b6001548156fea165627a7a723058200ee1eec08b128a32011e78a1d6a1d235425061e74c43f7e71c643053eef8bdd40029",
+  "deployedBytecode": "0x6080604052348015600f57600080fd5b506004361060325760003560e01c80631209b1f6146037578063e3ac5d26146053575b600080fd5b603d606f565b6040518082815260200191505060405180910390f35b60596075565b6040518082815260200191505060405180910390f35b60005481565b6001548156fea165627a7a723058200ee1eec08b128a32011e78a1d6a1d235425061e74c43f7e71c643053eef8bdd40029",
+  "sourceMap": "64:197:1:-;;;159:16;133:42;;240:18;220:38;;64:197;8:9:-1;5:2;;;30:1;27;20:12;5:2;64:197:1;;;;;;;",
+  "deployedSourceMap": "64:197:1:-;;;;8:9:-1;5:2;;;30:1;27;20:12;5:2;64:197:1;;;;;;;;;;;;;;;;;;;;;;;;133:42;;;:::i;:::-;;;;;;;;;;;;;;;;;;;220:38;;;:::i;:::-;;;;;;;;;;;;;;;;;;;133:42;;;;:::o;220:38::-;;;;:::o",
+  "source": "pragma solidity >=0.4.21 <0.6.0;\n\n/** @title Scratch Lottery */\ncontract ScratchLottery {\n    // 1000000000000000 wei = .001 eth\n    uint public ticketPrice = 1000000000000000;\n    // 100000000000000000 wei = .1 eth\n    uint public prize = 100000000000000000;\n}\n",
+  "sourcePath": "/home/chris/crunchy/eth-scratch-lottery/contracts/ScratchLottery.sol",
+  "ast": {
+    "absolutePath": "/home/chris/crunchy/eth-scratch-lottery/contracts/ScratchLottery.sol",
+    "exportedSymbols": {
+      "ScratchLottery": [
+        65
+      ]
+    },
+    "id": 66,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 58,
+        "literals": [
+          "solidity",
+          ">=",
+          "0.4",
+          ".21",
+          "<",
+          "0.6",
+          ".0"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "0:32:1"
+      },
+      {
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "documentation": "@title Scratch Lottery ",
+        "fullyImplemented": true,
+        "id": 65,
+        "linearizedBaseContracts": [
+          65
+        ],
+        "name": "ScratchLottery",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "constant": false,
+            "id": 61,
+            "name": "ticketPrice",
+            "nodeType": "VariableDeclaration",
+            "scope": 65,
+            "src": "133:42:1",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_uint256",
+              "typeString": "uint256"
+            },
+            "typeName": {
+              "id": 59,
+              "name": "uint",
+              "nodeType": "ElementaryTypeName",
+              "src": "133:4:1",
+              "typeDescriptions": {
+                "typeIdentifier": "t_uint256",
+                "typeString": "uint256"
+              }
+            },
+            "value": {
+              "argumentTypes": null,
+              "hexValue": "31303030303030303030303030303030",
+              "id": 60,
+              "isConstant": false,
+              "isLValue": false,
+              "isPure": true,
+              "kind": "number",
+              "lValueRequested": false,
+              "nodeType": "Literal",
+              "src": "159:16:1",
+              "subdenomination": null,
+              "typeDescriptions": {
+                "typeIdentifier": "t_rational_1000000000000000_by_1",
+                "typeString": "int_const 1000000000000000"
+              },
+              "value": "1000000000000000"
+            },
+            "visibility": "public"
+          },
+          {
+            "constant": false,
+            "id": 64,
+            "name": "prize",
+            "nodeType": "VariableDeclaration",
+            "scope": 65,
+            "src": "220:38:1",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_uint256",
+              "typeString": "uint256"
+            },
+            "typeName": {
+              "id": 62,
+              "name": "uint",
+              "nodeType": "ElementaryTypeName",
+              "src": "220:4:1",
+              "typeDescriptions": {
+                "typeIdentifier": "t_uint256",
+                "typeString": "uint256"
+              }
+            },
+            "value": {
+              "argumentTypes": null,
+              "hexValue": "313030303030303030303030303030303030",
+              "id": 63,
+              "isConstant": false,
+              "isLValue": false,
+              "isPure": true,
+              "kind": "number",
+              "lValueRequested": false,
+              "nodeType": "Literal",
+              "src": "240:18:1",
+              "subdenomination": null,
+              "typeDescriptions": {
+                "typeIdentifier": "t_rational_100000000000000000_by_1",
+                "typeString": "int_const 100000000000000000"
+              },
+              "value": "100000000000000000"
+            },
+            "visibility": "public"
+          }
+        ],
+        "scope": 66,
+        "src": "64:197:1"
+      }
+    ],
+    "src": "0:262:1"
+  },
+  "legacyAST": {
+    "absolutePath": "/home/chris/crunchy/eth-scratch-lottery/contracts/ScratchLottery.sol",
+    "exportedSymbols": {
+      "ScratchLottery": [
+        65
+      ]
+    },
+    "id": 66,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 58,
+        "literals": [
+          "solidity",
+          ">=",
+          "0.4",
+          ".21",
+          "<",
+          "0.6",
+          ".0"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "0:32:1"
+      },
+      {
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "documentation": "@title Scratch Lottery ",
+        "fullyImplemented": true,
+        "id": 65,
+        "linearizedBaseContracts": [
+          65
+        ],
+        "name": "ScratchLottery",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "constant": false,
+            "id": 61,
+            "name": "ticketPrice",
+            "nodeType": "VariableDeclaration",
+            "scope": 65,
+            "src": "133:42:1",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_uint256",
+              "typeString": "uint256"
+            },
+            "typeName": {
+              "id": 59,
+              "name": "uint",
+              "nodeType": "ElementaryTypeName",
+              "src": "133:4:1",
+              "typeDescriptions": {
+                "typeIdentifier": "t_uint256",
+                "typeString": "uint256"
+              }
+            },
+            "value": {
+              "argumentTypes": null,
+              "hexValue": "31303030303030303030303030303030",
+              "id": 60,
+              "isConstant": false,
+              "isLValue": false,
+              "isPure": true,
+              "kind": "number",
+              "lValueRequested": false,
+              "nodeType": "Literal",
+              "src": "159:16:1",
+              "subdenomination": null,
+              "typeDescriptions": {
+                "typeIdentifier": "t_rational_1000000000000000_by_1",
+                "typeString": "int_const 1000000000000000"
+              },
+              "value": "1000000000000000"
+            },
+            "visibility": "public"
+          },
+          {
+            "constant": false,
+            "id": 64,
+            "name": "prize",
+            "nodeType": "VariableDeclaration",
+            "scope": 65,
+            "src": "220:38:1",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_uint256",
+              "typeString": "uint256"
+            },
+            "typeName": {
+              "id": 62,
+              "name": "uint",
+              "nodeType": "ElementaryTypeName",
+              "src": "220:4:1",
+              "typeDescriptions": {
+                "typeIdentifier": "t_uint256",
+                "typeString": "uint256"
+              }
+            },
+            "value": {
+              "argumentTypes": null,
+              "hexValue": "313030303030303030303030303030303030",
+              "id": 63,
+              "isConstant": false,
+              "isLValue": false,
+              "isPure": true,
+              "kind": "number",
+              "lValueRequested": false,
+              "nodeType": "Literal",
+              "src": "240:18:1",
+              "subdenomination": null,
+              "typeDescriptions": {
+                "typeIdentifier": "t_rational_100000000000000000_by_1",
+                "typeString": "int_const 100000000000000000"
+              },
+              "value": "100000000000000000"
+            },
+            "visibility": "public"
+          }
+        ],
+        "scope": 66,
+        "src": "64:197:1"
+      }
+    ],
+    "src": "0:262:1"
+  },
+  "compiler": {
+    "name": "solc",
+    "version": "0.5.8+commit.23d335f2.Emscripten.clang"
+  },
+  "networks": {
+    "5777": {
+      "events": {},
+      "links": {},
+      "address": "0xf5ec8484B65e47930dbF79a1587feD1512711b7b",
+      "transactionHash": "0xb44612a8db4366c3515462e40f95c12d80dbdf0e6091ecce5a4ec4af6f1aba65"
+    }
+  },
+  "schemaVersion": "3.0.10",
+  "updatedAt": "2019-06-09T11:13:23.974Z",
+  "devdoc": {
+    "methods": {},
+    "title": "Scratch Lottery "
+  },
+  "userdoc": {
+    "methods": {}
+  }
+}
