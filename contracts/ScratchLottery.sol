@@ -20,8 +20,8 @@ contract ScratchLottery {
 
     mapping(address => Player) public players;
 
-    event TicketPurchased(address player, uint id, uint);
-    event TicketRedeemed(address bidder, uint amount);
+    event TicketPurchased(address player, uint id);
+    event TicketRedeemed(address player, uint id, uint value);
 
     constructor() public {
         // .001 eth = 1000000000000000 wei
@@ -42,16 +42,17 @@ contract ScratchLottery {
                 ticketCount: 0
             });
         }
-
         players[msg.sender].ticketCount ++;
+        uint ticketCount = players[msg.sender].ticketCount;
         players[msg.sender].tickets[players[msg.sender].ticketCount] = Ticket({
-            id: players[msg.sender].ticketCount,
+            id: ticketCount,
             blockNumber: block.number,
             redeemableAt: block.number + 1,
             redeemedAt: 0
         });
         // return any overpayment to the sender
         msg.sender.transfer(msg.value - ticketPrice);
+        emit TicketPurchased(msg.sender, ticketCount);
     }
 
     function getTicketCount() public view returns (uint){
@@ -112,5 +113,6 @@ contract ScratchLottery {
         // mark the ticket as redeemed
         players[msg.sender].tickets[ticketId].redeemedAt = block.number;
         msg.sender.transfer(prizeMultiplier * zeros1);
+        emit TicketRedeemed(msg.sender, ticket.id, zeros1);
     }
 }
