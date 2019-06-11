@@ -4,7 +4,8 @@
   "description": "scratch lottery game for the ethereum blockchain",
   "main": "index.js",
   "scripts": {
-    "test": "npx truffle test"
+    "test": "npx truffle test",
+    "remix": "npx remixd -s . --remix-ide https://remix.ethereum.org"
   },
   "repository": {
     "type": "git",
@@ -23,6 +24,10 @@
   },
   "homepage": "https://github.com/ScaredIbis/eth-scratch-lottery#readme",
   "devDependencies": {
+    "remixd": "^0.1.8-alpha.6",
     "truffle": "^5.0.21"
+  },
+  "dependencies": {
+    "openzeppelin-solidity": "^2.3.0"
   }
 }

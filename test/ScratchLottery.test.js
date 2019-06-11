@@ -13,8 +13,8 @@ contract('ScratchLottery', accounts => {
         assert.notEqual(address, undefined);
     })
 
-    it('returns ticketCount of 0 for a player with no tickets', async () => {
-        const ticketCount = await this.scratchLottery.getTicketCount();
+    it('returns ticketCount of 0 when first deployed', async () => {
+        const ticketCount = await this.scratchLottery.ticketCount();
         assert.equal(ticketCount.toNumber(), 0);
     })
 
@@ -22,26 +22,16 @@ contract('ScratchLottery', accounts => {
         try {
             await this.scratchLottery.purchaseTicket();
         } catch (e) {
-            const correctError = e.message.includes('Tickets cost 0.001 eth');
-            assert(correctError, `Unexpected error: ${e.message}`)
-        }
-    })
-
-    it('rejects a ticket purchase with incorrect payment amount', async () => {
-        try {
-            // attempt to overpay
-            await this.scratchLottery.purchaseTicket({ value: 1000000000000001 });
-        } catch (e) {
-            const correctError = e.message.includes('Tickets cost 0.001 eth');
+            const correctError = e.message.includes('Tickets cost 0.005 eth');
             assert(correctError, `Unexpected error: ${e.message}`)
         }
     })
 
     it('creates a ticket when correct payment is provided', async () => {
-        await this.scratchLottery.purchaseTicket({ value: 1000000000000000 });
-        const ticketCount = await this.scratchLottery.getTicketCount();
+        await this.scratchLottery.purchaseTicket({ value: 5000000000000000 });
+        const ticketCount = await this.scratchLottery.ticketCount();
         assert.equal(ticketCount.toNumber(), 1);
-        const ticket = await this.scratchLottery.getTicket(ticketCount);
+        const ticket = await this.scratchLottery.getTicket();
         const id = ticket.id.toNumber();
         const blockNumber = ticket.blockNumber.toNumber();
         const redeemableAt = ticket.redeemableAt.toNumber();
@@ -51,7 +41,7 @@ contract('ScratchLottery', accounts => {
         assert.notEqual(blockNumber, null);
         assert.notEqual(blockNumber, undefined);
         assert.notEqual(blockNumber, '');
-        assert.equal(redeemableAt, blockNumber + 2);
+        assert.equal(redeemableAt, blockNumber + 1);
         assert.equal(redeemedAt, 0);
-    })
+    });
 })
