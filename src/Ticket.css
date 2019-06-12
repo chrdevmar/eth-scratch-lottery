@@ -1,0 +1,10 @@
+
+.ticket {
+    padding: 15px;
+    border: 1px solid black;
+}
+
+.ticket-header {
+    text-align: center;
+    margin-bottom: 50px;
+}

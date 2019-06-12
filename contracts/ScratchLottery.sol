@@ -4,9 +4,8 @@ import 'openzeppelin-solidity/contracts/ownership/Ownable.sol';
 
 /** @title Scratch Lottery */
 contract ScratchLottery is Ownable {
-    // .001 eth = 1000000000000000 wei
+    // .005 eth = 5000000000000000 wei
     uint public ticketPrice = .005 ether;
-    // .1 eth = 100000000000000000 wei
     uint public prizeMultiplier = .005 ether;
     uint public ticketCount = 0;
     uint float = .5 ether;

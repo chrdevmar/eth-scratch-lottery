@@ -1,0 +1,7 @@
+.cell {
+    padding-bottom: 100%;
+    background-color: grey;
+    border: 1px solid black;
+    cursor: pointer;
+    content: 'Hello'
+}
