@@ -12582,12 +12582,12 @@
         }
       },
       "links": {},
-      "address": "0x0dEc0bdea75c2d4a7348E57026FC61E968B7B281",
-      "transactionHash": "0x2765112830a4b59479b293fbb7f0128f3853bbe92c779c57dc28137003a3d10a"
+      "address": "0xf5ec8484B65e47930dbF79a1587feD1512711b7b",
+      "transactionHash": "0x205eb2b5aa897e4c03e781da7a835a57327c4afc7740c147406b65fffcd97aa8"
     }
   },
   "schemaVersion": "3.0.10",
-  "updatedAt": "2019-06-12T13:37:50.382Z",
+  "updatedAt": "2019-06-13T12:08:47.351Z",
   "devdoc": {
     "methods": {
       "isOwner()": {

@@ -3,20 +3,17 @@ import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 
-import { getCellValue } from './helpers';
+import { getCellValue, simulate } from './helpers';
 
 import './Cell.css';
 import './Ticket.css';
 
 const Cell = (props) => {
-    const { index } = props;
-
     return (
         <div
             className="cell px-0 m-1"
-            onClick={() => getCellValue(ticket, index)}
+            onClick={props.onClick}
         >
-
         </div>
     )
 }
@@ -56,7 +53,7 @@ class Ticket extends Component {
         return (
             <Container>
                 {
-                    ticket.id && ticket.id.toNumber() ?
+                    ticket.id && ticket.id.toNumber() &&
                     (
                         <Row className="justify-content-center">
                             <Col xs="8" md="6" lg="4">
@@ -71,13 +68,18 @@ class Ticket extends Component {
                                             xs="4"
                                             className="px-0"
                                         >
-                                            <Cell index={index} ticketId={ticket.id.toNumber()}/>
+                                            <Cell
+                                                onClick={() => {
+                                                    getCellValue(account, ticket, index)
+                                                }}
+                                            />
                                         </Col>
                                     ))}
                                 </Row>
                             </Col>
                         </Row>
-                    ) : (
+                    )
+                }
                         <div
                             onClick={async () => {
                                 const newTicket = await scratchLottery.purchaseTicket({
@@ -89,8 +91,11 @@ class Ticket extends Component {
                         >
                             Click here to purchase a ticket
                         </div>
-                    )
-                }
+                        <div
+                            onClick={simulate}
+                        >
+                            simulate 10000 tickets
+                        </div>
             </Container>
         )
     }
