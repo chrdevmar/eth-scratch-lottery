@@ -7,7 +7,7 @@ async function loadWeb3() {
         console.log(web3.currentProvider);
         web3 = new Web3(web3.currentProvider)
     } else {
-        window.alert("Please connect to Metamask.")
+        throw new Error('web3 not inject, please connect with metamask')
     }
     // Modern dapp browsers...
     if (window.ethereum) {

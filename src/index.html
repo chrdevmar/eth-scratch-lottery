@@ -3,10 +3,48 @@
   <head>
     <meta charset="UTF-8">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-
+    <link href="https://fonts.googleapis.com/css?family=Work+Sans&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="main.css">
     <title>Ethereum Scratch Lottery</title>
   </head>
   <body>
-    <div id="app"></div>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-5">
+      <div class="container">
+        <a class="navbar-brand" href="#">etherscratch</a>
+      </div>
+    </nav>
+    <div class="container">
+      <div class="row">
+        <div class="col-md-4">
+          <div class="alert alert-primary" role="alert">
+            <h5 class="alert-heading"><strong>Welcome to etherscratch!</strong></h5>
+            <p>The provably fair instant scratch-it lottery game for ethereum</p>
+            <hr>
+            <h5 class="alert-heading text-strong"><strong>How to play</strong></h5>
+            <p class="mb-0">
+              Simply buy a ticket, wait for it to be mined and then <i>scratch</i> the cells to reveal their values.
+              Reveal 3 or more matching values to win that amount of ether.
+            </p>
+            <hr>
+            <h5 class="alert-heading text-strong"><strong>How it works</strong></h5>
+            <p class="mb-0">
+              Each of the 12 cells on a ticket is converted to a unique and unpredictable hash of 32 digits. Each of these digits hold a value between 0 and 255.
+              Cells are assigned an ether value based on how many of the first 5 digits of this hash are between 0 and 12.
+            </p>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div id="app"></div>
+        </div>
+        <div class="col-md-4">
+          <div id="stats"></div>
+        </div>
+      </div>
+    </div>
+    <footer class="footer">
+      <div class="container">
+        <span class="text-muted">Place sticky footer content here.</span>
+      </div>
+    </footer>
   </body>
 </html>

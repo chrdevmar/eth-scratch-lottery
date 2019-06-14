@@ -8,7 +8,6 @@ contract ScratchLottery is Ownable {
     uint public ticketPrice = .005 ether;
     uint public prizeMultiplier = .005 ether;
     uint public ticketCount = 0;
-    uint public paidOut = 0 ether;
     uint payoutFloat = .5 ether;
 
     struct Ticket {
@@ -30,10 +29,11 @@ contract ScratchLottery is Ownable {
     }
 
     function jackpot () public view returns (uint) {
-        if(address(this).balance < payoutFloat) {
+        uint maxPayout = prizeMultiplier ** 5;
+        if(address(this).balance < maxPayout) {
             return address(this).balance;
         }
-        return payoutFloat;
+        return maxPayout;
     }
 
     function withdraw(uint amount) public payable onlyOwner returns(bool) {
@@ -41,7 +41,7 @@ contract ScratchLottery is Ownable {
         if(amount > address(this).balance) {
             payout = address(this).balance;
         }
-        address(uint160(owner())).transfer(payout - float);
+        address(uint160(owner())).transfer(payout - payoutFloat);
         return true;
     }
 
@@ -76,7 +76,7 @@ contract ScratchLottery is Ownable {
     function countTargetsInFirst5Bytes(bytes32 _hash) internal pure returns(uint8) {
         uint8 count = 0;
         for(uint8 i = 0; i < 5; i++) {
-            if(uint8(_hash[i]) >= 0 && uint(_hash[i]) <= 18) {
+            if(uint8(_hash[i]) >= 0 && uint8(_hash[i]) <= 12) {
                 count++;
             }
         }
@@ -88,10 +88,6 @@ contract ScratchLottery is Ownable {
      * prize is .05 ether * number of zeros
      */
     function redeemWin(uint _index1, uint _index2, uint _index3) public {
-        Ticket memory ticket = players[msg.sender];
-        require(ticket.id != 0, 'You have no ticket');
-        require(ticket.redeemableAt <= block.number, 'Ticket not mined yet');
-        require(ticket.redeemedAt == 0, 'Ticket already redeemed');
         require(
             _index1 != _index2 && _index2 != _index3 && _index1 != _index3,
             'Must provide 3 unique cells'
@@ -100,7 +96,11 @@ contract ScratchLottery is Ownable {
             _index1 < 12 && _index2 < 12 && _index3 < 12,
             'Tickets only contain cells 0 to 11'
         );
-        bytes32 nextBlockHash = keccak256(abi.encodePacked((ticket.redeemableAt)));
+        Ticket memory ticket = players[msg.sender];
+        require(ticket.id > 0, 'You have no ticket');
+        require(ticket.redeemableAt <= block.number, 'Ticket not mined yet');
+        require(ticket.redeemedAt == 0, 'Ticket already redeemed');
+        bytes32 nextBlockHash = blockhash(ticket.redeemableAt);
 
         require(
             nextBlockHash != 0x0000000000000000000000000000000000000000000000000000000000000000,
@@ -111,10 +111,10 @@ contract ScratchLottery is Ownable {
         uint count1 = countTargetsInFirst5Bytes(_hash1);
 
         bytes32 _hash2 = keccak256(abi.encodePacked(msg.sender,ticket.id,_index2,nextBlockHash));
-        uint8 count2 = countTargetsInFirst5Bytes(_hash2);
+        uint count2 = countTargetsInFirst5Bytes(_hash2);
 
         bytes32 _hash3 = keccak256(abi.encodePacked(msg.sender,ticket.id,_index3,nextBlockHash));
-        uint8 count3 = countTargetsInFirst5Bytes(_hash3);
+        uint count3 = countTargetsInFirst5Bytes(_hash3);
 
         // make sure number of zeros for all claimed cells match
         require(count1 == count2 && count2 == count3, '3 matches required to win');
@@ -126,7 +126,6 @@ contract ScratchLottery is Ownable {
         }
         players[msg.sender].redeemedAt = block.number;
         msg.sender.transfer(payout);
-        paidOut += payout;
         emit TicketRedeemed(msg.sender, ticket.id, payout);
     }
 }

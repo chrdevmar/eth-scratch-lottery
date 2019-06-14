@@ -1,10 +1,12 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin')
+const CopyPlugin = require('copy-webpack-plugin');
 
 module.exports = {
   entry: './src/index.js',
   output: {
     filename: 'main.js',
+    publicPath: 'dist',
     path: path.resolve(__dirname, 'dist')
   },
   devServer: {
@@ -31,6 +33,9 @@ module.exports = {
     new HtmlWebpackPlugin({
       template: './src/index.html',
       inject: 'body'
-    })
+    }),
+    // new CopyPlugin([
+    //   { from: './main.css', to: './main.css', writeToDisk: true}
+    // ]),
   ]
 };

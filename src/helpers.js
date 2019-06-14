@@ -1,19 +1,30 @@
 export const getCellValue = async function(account, ticket, index) {
-    console.log('redeemableAt', ticket.redeemableAt.toNumber())
     const redeemableAtBlock = await web3.eth.getBlock(ticket.redeemableAt.toNumber());
-    const cellHash = web3.utils.soliditySha3(account, ticket.id.toNumber(), index, redeemableAtBlock.hash);
-    const zeroToFiveCount = countZerosInFirst5Bytes(cellHash);
+    const nextHashAsBytes = chunkHexString(redeemableAtBlock.hash);
+    const bytesArgs = nextHashAsBytes.map(byte => ({t: 'bytes', v: byte}));
+
+    const cellHash = web3.utils.soliditySha3(account, ticket.id.toNumber(), index, ...bytesArgs);
+    const targetCount = countTargetsInFirstFiveBytes(cellHash);
 
     let cellValue = 0;
-    if(zeroToFiveCount > 0) {
-        cellValue = 0.005 * (10 ** (zeroToFiveCount - 1));
+    if(targetCount > 0) {
+        cellValue = 0.005 * (10 ** (targetCount - 1));
     }
-    console.log('cell value', cellValue);
+    return cellValue;
+}
+
+function chunkHexString(hexStr) {
+    const bytes = [];
+    for(let i = 0; i < hexStr.length; i += 2) {
+        bytes.push(hexStr.substr(i, 2))
+    }
+    return bytes;
 }
 
 export const simulate = function() {
     const values = {};
-    for(let i = 0; i < 10000; i++) {
+    let numSimulations = 500000
+    for(let i = 0; i < numSimulations; i++) {
         const simulatedCardValue = simulateCard(i);
         values[simulatedCardValue] = values[simulatedCardValue] || 0;
         values[simulatedCardValue]++;
@@ -21,27 +32,27 @@ export const simulate = function() {
     console.log('VALUES', values);
     const probs = {};
     for(let index in values) {
-        probs[index] = values[index]/10000;
+        probs[index] = values[index]/numSimulations;
     }
     console.log('PROBS', probs);
-    console.log('REVENUE: ', 10000 * .005);
+    console.log('REVENUE: ', numSimulations * .005);
     let payouts = 0;
     for (let value in values) {
         payouts += Number(value) * values[value];
     }
     console.log('PAYOUTS: ', payouts);
-    console.log('PROFIT: ',  (10000 * .005) - payouts)
+    console.log('PROFIT: ',  (numSimulations * .005) - payouts)
 }
 
 function simulateCard(cardNum) {
     const cells = {};
     for(let i = 0; i < 11; i++) {
         const cellHash = web3.utils.soliditySha3(i, cardNum, new Date().valueOf());
-        const zeroToFiveCount = countZerosInFirst5Bytes(cellHash);
+        const targetCount = countTargetsInFirstFiveBytes(cellHash);
 
         let cellValue = 0;
-        if(zeroToFiveCount > 0) {
-            cellValue = 0.005 * (10 ** (zeroToFiveCount-1));
+        if(targetCount > 0) {
+            cellValue = 0.005 * (10 ** (targetCount-1));
         }
         cells[`${cellValue}`] = cells[`${cellValue}`] || 0;
         cells[`${cellValue}`]++;
@@ -56,12 +67,12 @@ function simulateCard(cardNum) {
     return cardValue;
 }
 
-function countZerosInFirst5Bytes(hash) {
+function countTargetsInFirstFiveBytes(hash) {
     let count = 0;
 
     for(let i = 2; i < 12; i += 2) {
         const value = parseInt(`0x${hash.charAt(i)}${hash.charAt(i+1)}`);
-        if(value >= 0 && value <= 18) {
+        if(value >= 0 && value <= 12) {
             count++;
         }
     }

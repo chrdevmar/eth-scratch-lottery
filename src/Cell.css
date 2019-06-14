@@ -1,7 +1,32 @@
 .cell {
     padding-bottom: 100%;
-    background-color: grey;
     border: 1px solid black;
     cursor: pointer;
-    content: 'Hello'
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.cell div {
+    position: absolute;
+    top: 30%;
+    text-align: center;
+}
+
+.cell.revealed {
+    background-color: transparent;
+    -webkit-transition: background-color 500ms ease-in-out;
+    -ms-transition: background-color 500ms ease-in-out;
+    transition: background-color 500ms ease-in-out;
+}
+
+.cell.hidden {
+    background-color: grey;
+    -webkit-transition: background-color 500ms ease-in-out;
+    -ms-transition: background-color 500ms ease-in-out;
+    transition: background-color 500ms ease-in-out;
+}
+
+.cell.hidden div {
+    z-index: -1;
 }
