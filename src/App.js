@@ -7,7 +7,7 @@ import loadWeb3 from './loadWeb3';
 import { getCellValue, getWinningCellIndexes, getTicketValue } from './helpers';
 
 import Ticket from './Ticket';
-import Stats from './Stats';
+import Summary from './Summary';
 
 class App extends Component {
     constructor(props) {
@@ -23,6 +23,32 @@ class App extends Component {
         }
         this.purchaseTicket = this.purchaseTicket.bind(this);
         this.redeemTicket = this.redeemTicket.bind(this);
+        this.donateToContract = this.donateToContract.bind(this);
+        this.donateToOwner = this.donateToOwner.bind(this);
+    }
+
+    async donateToContract(amount) {
+        const { scratchLottery, account } = this.state;
+        await scratchLottery.donateToContract({
+            value: web3.utils.toWei(amount),
+            from: account
+        });
+        const jackpot = await scratchLottery.jackpot();
+        this.setState({
+            jackpot: web3.utils.fromWei(jackpot)
+        })
+    }
+
+    async donateToOwner(amount) {
+        const { scratchLottery, account } = this.state;
+        await scratchLottery.donateToOwner({
+            value: web3.utils.toWei(amount),
+            from: account
+        });
+        const jackpot = await scratchLottery.jackpot();
+        this.setState({
+            jackpot: web3.utils.fromWei(jackpot)
+        })
     }
 
     async purchaseTicket() {
@@ -70,8 +96,10 @@ class App extends Component {
                 gas: Math.round(gasEstimate * 1.5)
             })
             const ticket = await scratchLottery.getTicket()
+            const jackpot = await scratchLottery.jackpot();
             this.setState({
                 ticket,
+                jackpot: web3.utils.fromWei(jackpot),
                 miningPrize: false,
             });
         } catch (e) {
@@ -148,7 +176,7 @@ class App extends Component {
                             purchaseTicket={this.purchaseTicket}
                         />
                         {ReactDOM.createPortal(
-                            <Stats
+                            <Summary
                                 cellValues={cellValues}
                                 ticket={ticket}
                                 purchaseTicket={this.purchaseTicket}
@@ -156,6 +184,8 @@ class App extends Component {
                                 miningTicket={miningTicket}
                                 miningPrize={miningPrize}
                                 jackpot={jackpot}
+                                donateToContract={this.donateToContract}
+                                donateToOwner={this.donateToOwner}
                             />,
                             document.getElementById('stats')
                         )}

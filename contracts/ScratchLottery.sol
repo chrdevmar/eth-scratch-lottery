@@ -8,7 +8,7 @@ contract ScratchLottery is Ownable {
     uint public ticketPrice = .005 ether;
     uint public prizeMultiplier = .005 ether;
     uint public ticketCount = 0;
-    uint payoutFloat = .5 ether;
+    uint public donationsToOwner = 0 ether;
 
     struct Ticket {
         uint id; //ticket number, unique to player (address)
@@ -20,12 +20,22 @@ contract ScratchLottery is Ownable {
     mapping(address => Ticket) public players;
 
     event TicketPurchased(address player, uint id);
+    event DonationReceived();
     event TicketRedeemed(address player, uint id, uint value);
 
     function() external payable { }
 
     function balance () public view returns (uint) {
         return address(this).balance;
+    }
+
+    function donateToOwner() public payable {
+        donationsToOwner += msg.value;
+        emit DonationReceived();
+    }
+
+    function donateToContract() public payable {
+        emit DonationReceived();
     }
 
     function jackpot () public view returns (uint) {
@@ -36,13 +46,11 @@ contract ScratchLottery is Ownable {
         return maxPayout;
     }
 
-    function withdraw(uint amount) public payable onlyOwner returns(bool) {
-        uint payout = amount;
-        if(amount > address(this).balance) {
-            payout = address(this).balance;
-        }
-        address(uint160(owner())).transfer(payout - payoutFloat);
-        return true;
+    function withdrawDonationsToOwner() public payable onlyOwner {
+        require(donationsToOwner > 0, 'No donations to withdraw');
+        uint amountToWithdraw = donationsToOwner;
+        donationsToOwner = 0;
+        address(uint160(owner())).transfer(amountToWithdraw);
     }
 
     function purchaseTicket() public payable {
