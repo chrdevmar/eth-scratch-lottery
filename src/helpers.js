@@ -78,3 +78,32 @@ function countTargetsInFirstFiveBytes(hash) {
     }
     return count;
 }
+
+export const getTicketValue = function(cellValues) {
+    let valueCounts = {};
+    Object.values(cellValues).forEach(cellValue => {
+        valueCounts[cellValue] = valueCounts[cellValue] || 0;
+        valueCounts[cellValue]++;
+    });
+
+    let ticketValue = 0;
+    for(let value in valueCounts) {
+        if(valueCounts[value] >= 3 && Number(value) > ticketValue) {
+            ticketValue = Number(value);
+        }
+    }
+    return ticketValue;
+}
+
+export const getWinningCellIndexes = function (ticketValue, cellValues) {
+    const winningCellIndexes = [];
+    for(let cellIndex in cellValues) {
+        if(winningCellIndexes.length === 3) {
+            continue;
+        }
+        if(Number(cellValues[cellIndex]) === ticketValue) {
+            winningCellIndexes.push(Number(cellIndex))
+        }
+    }
+    return winningCellIndexes;
+}

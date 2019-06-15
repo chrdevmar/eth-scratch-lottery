@@ -4,8 +4,8 @@ async function loadWeb3() {
     let web3Provider;
     if (typeof web3 !== 'undefined') {
         web3Provider = web3.currentProvider
-        console.log(web3.currentProvider);
-        web3 = new Web3(web3.currentProvider)
+        web3 = new Web3(web3.currentProvider);
+        // new Web3.providers.WebsocketProvider('ws://localhost:7545')
     } else {
         throw new Error('web3 not inject, please connect with metamask')
     }

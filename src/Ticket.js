@@ -10,55 +10,63 @@ import Col from 'react-bootstrap/Col';
 import './Cell.css';
 import './Ticket.css';
 
+const cellValueClassMappings = {
+    '0': 'value-0',
+    '0.005': 'value-0005',
+    '0.05': 'value-005',
+    '0.5': 'value-05',
+    '5': 'value-5',
+    '50': 'value-50',
+}
+
 const Cell = (props) => {
     return (
         <div
-            className={`cell px-0 m-1 ${props.value != null ? 'revealed' : 'hidden'}`}
+            className={`cell px-0 m-1 ${cellValueClassMappings[props.value]} ${props.value != null ? 'revealed' : 'hidden'}`}
             onClick={props.onClick}
         >
-            <div>{props.value}<br/>ether</div>
+            <div>
+                <img src="./assets/eth.png"></img><br/>
+                <strong>{props.value}</strong>
+            </div>
         </div>
     )
 }
 
 class Ticket extends Component {
-
     render() {
         const {
-            scratchLottery,
-            account,
             cellValues,
             onCellClick,
             ticket,
-            ticketLoaded
+            ticketLoaded,
+            purchaseTicket
         } = this.props;
         return (
-            <Container>
+            <React.Fragment>
                 {
                     ticketLoaded && ticket.id && !!ticket.id.toNumber() &&
                     (
-                        <Card>
-                            <Card.Body className="text-center">
-                                <Card.Title><strong>Ticket #{ticket.id.toNumber()}</strong></Card.Title>
-                                <Card.Subtitle className="mb-2 text-muted">Match 3 squares to win</Card.Subtitle>
-                                <hr/>
-                                <Row className="m-0">
-                                { Array(12).fill({}).map((val, index) => (
-                                    <Col
-                                        key={index}
-                                        xs="4"
-                                        className="px-0"
-                                    >
-                                        <Cell
-                                            value={cellValues[index]}
-                                            onClick={() => {
-                                                onCellClick(index);
-                                            }}
-                                        />
-                                    </Col>
-                                ))}
-                                </Row>
-                            </Card.Body>
+                        <Card className="ticket text-center">
+                            <Card.Title as="h3"><strong>Ticket #{ticket.id.toNumber()}</strong></Card.Title>
+                            <Card.Subtitle className="mb-2">Reveal 3 matching squares to win!</Card.Subtitle>
+                            <hr/>
+                            <Row className="m-0">
+                            { Array(12).fill({}).map((val, index) => (
+                                <Col
+                                    key={index}
+                                    xs="4"
+                                    className="px-0"
+                                >
+                                    <Cell
+                                        value={cellValues[index]}
+                                        onClick={() => {
+                                            onCellClick(index);
+                                        }}
+                                    />
+                                </Col>
+                            ))}
+                            </Row>
                         </Card>
                     )
                 }
@@ -71,16 +79,10 @@ class Ticket extends Component {
                                 <Card.Subtitle className="mb-2 text-muted">you should get one</Card.Subtitle>
                                 <hr/>
                                 <Card.Text>
-                                    Tickets cost .005 ether and take one block (10-20 seconds) to mine
+                                    Tickets cost .005 ETH and take one block (10-20 seconds) to mine
                                 </Card.Text>
                                 <Button
-                                    onClick={async () => {
-                                        const newTicket = await scratchLottery.purchaseTicket({
-                                            from: account,
-                                            value: 5000000000000000
-                                        })
-                                        console.log('NEW TICKET', newTicket);
-                                    }}
+                                    onClick={purchaseTicket}
                                     variant="success"
                                 >
                                     Get a ticket
@@ -95,7 +97,7 @@ class Ticket extends Component {
                         <Spinner animation="grow" />
                     </div>
                 }
-            </Container>
+            </React.Fragment>
         )
     }
 }

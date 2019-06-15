@@ -1,10 +1,15 @@
 .cell {
     padding-bottom: 100%;
-    border: 1px solid black;
+    border: 0.5px solid darkgray;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+.cell img{
+    position: relative;
+    max-height: 2rem;
 }
 
 .cell div {
@@ -25,6 +30,30 @@
     -webkit-transition: background-color 500ms ease-in-out;
     -ms-transition: background-color 500ms ease-in-out;
     transition: background-color 500ms ease-in-out;
+}
+
+.cell.revealed.value-0 {
+    background-color: lightgray
+}
+
+.cell.revealed.value-0005 {
+    background-color: #20BC62
+}
+
+.cell.revealed.value-005 {
+    background-color: #FFA552
+}
+
+.cell.revealed.value-05 {
+    background-color: rgb(69, 118, 173)
+}
+
+.cell.revealed.value-5 {
+    background-color: #513B56
+}
+
+.cell.revealed.value-50 {
+    background-color: rgb(199, 174, 61)
 }
 
 .cell.hidden div {

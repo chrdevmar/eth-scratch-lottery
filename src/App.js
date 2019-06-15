@@ -4,7 +4,7 @@ import contract from 'truffle-contract';
 import ScratchLotteryContract from '../build/contracts/ScratchLottery.json';
 import loadWeb3 from './loadWeb3';
 
-import { getCellValue } from './helpers';
+import { getCellValue, getWinningCellIndexes, getTicketValue } from './helpers';
 
 import Ticket from './Ticket';
 import Stats from './Stats';
@@ -17,6 +17,67 @@ class App extends Component {
             scratchLottery: null,
             noWeb3: false,
             cellValues: {},
+            miningTicket: false,
+            miningPrize: false,
+            jackpot: null
+        }
+        this.purchaseTicket = this.purchaseTicket.bind(this);
+        this.redeemTicket = this.redeemTicket.bind(this);
+    }
+
+    async purchaseTicket() {
+        const { scratchLottery, account } = this.state;
+        try {
+            this.setState({
+                miningTicket: true
+            })
+            await scratchLottery.purchaseTicket({
+                from: account,
+                value: 5000000000000000
+            })
+            const ticket = await scratchLottery.getTicket();
+            const jackpot = await scratchLottery.jackpot();
+            this.setState({
+                ticket,
+                jackpot: web3.utils.fromWei(jackpot),
+                miningTicket: false,
+                cellValues: {}
+            })
+        } catch (e) {
+            this.setState({
+                miningTicket: false
+            })
+        }
+    }
+
+    async redeemTicket() {
+        const { scratchLottery, account, cellValues } = this.state;
+
+        const ticketValue = getTicketValue(cellValues);
+        const winningCellIndexes = getWinningCellIndexes(ticketValue, cellValues);
+        const gasEstimate = await scratchLottery.methods["redeemWin(uint256,uint256,uint256)"]
+        .estimateGas(...winningCellIndexes, {
+            from: account
+        })
+        try {
+            this.setState({
+                miningPrize: true
+            })
+            await scratchLottery.redeemWin(
+            ...winningCellIndexes,
+            {
+                from: account,
+                gas: Math.round(gasEstimate * 1.5)
+            })
+            const ticket = await scratchLottery.getTicket()
+            this.setState({
+                ticket,
+                miningPrize: false,
+            });
+        } catch (e) {
+            this.setState({
+                miningPrize: false
+            })
         }
     }
 
@@ -27,6 +88,7 @@ class App extends Component {
             ScratchLottery.setProvider(web3Provider)
             const scratchLottery = await ScratchLottery.deployed();
             const [account] = await web3.eth.getAccounts();
+            const jackpot = await scratchLottery.jackpot();
             const ticket = await scratchLottery.getTicket({
                 from: account
             });
@@ -35,10 +97,10 @@ class App extends Component {
                 scratchLottery,
                 ticket,
                 account,
+                jackpot: web3.utils.fromWei(jackpot),
                 ticketLoaded: true
-            })
+            });
         } catch (e) {
-            console.log('ERROR', e)
             this.setState({
                 noWeb3: true,
                 loaded: true,
@@ -54,7 +116,10 @@ class App extends Component {
             noWeb3,
             cellValues,
             ticket,
-            ticketLoaded
+            jackpot,
+            ticketLoaded,
+            miningPrize,
+            miningTicket
         } = this.state;
         return (
             <React.Fragment>
@@ -80,13 +145,17 @@ class App extends Component {
                             cellValues={cellValues}
                             ticket={ticket}
                             ticketLoaded={ticketLoaded}
+                            purchaseTicket={this.purchaseTicket}
                         />
                         {ReactDOM.createPortal(
                             <Stats
-                                scratchLottery={scratchLottery}
                                 cellValues={cellValues}
-                                account={account}
                                 ticket={ticket}
+                                purchaseTicket={this.purchaseTicket}
+                                redeemTicket={this.redeemTicket}
+                                miningTicket={miningTicket}
+                                miningPrize={miningPrize}
+                                jackpot={jackpot}
                             />,
                             document.getElementById('stats')
                         )}

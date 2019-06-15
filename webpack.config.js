@@ -6,7 +6,7 @@ module.exports = {
   entry: './src/index.js',
   output: {
     filename: 'main.js',
-    publicPath: 'dist',
+    // publicPath: 'dist',
     path: path.resolve(__dirname, 'dist')
   },
   devServer: {
@@ -34,8 +34,8 @@ module.exports = {
       template: './src/index.html',
       inject: 'body'
     }),
-    // new CopyPlugin([
-    //   { from: './main.css', to: './main.css', writeToDisk: true}
-    // ]),
+    new CopyPlugin([
+      { from: './src/assets', to: './assets', writeToDisk: true}
+    ]),
   ]
 };

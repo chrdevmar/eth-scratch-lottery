@@ -1,36 +1,11 @@
 import React, { Component } from 'react';
 import Alert from 'react-bootstrap/Alert';
 import Button from 'react-bootstrap/Button';
+import Spinner from 'react-bootstrap/Spinner';
+import Popover from 'react-bootstrap/Popover';
+import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 
-function getTicketValue(cellValues) {
-    let valueCounts = {};
-    Object.values(cellValues).forEach(cellValue => {
-        valueCounts[cellValue] = valueCounts[cellValue] || 0;
-        valueCounts[cellValue]++;
-    });
-
-    let ticketValue = 0;
-    for(let value in valueCounts) {
-        if(valueCounts[value] >= 3 && Number(value) > ticketValue) {
-            ticketValue = Number(value);
-        }
-    }
-    return ticketValue;
-}
-
-function getWinningCellIndexes(ticketValue, cellValues) {
-    const winningCellIndexes = [];
-    for(let cellIndex in cellValues) {
-        if(winningCellIndexes.length === 3) {
-            continue;
-        }
-        if(Number(cellValues[cellIndex]) === ticketValue) {
-            winningCellIndexes.push(Number(cellIndex))
-        }
-    }
-    return winningCellIndexes;
-}
-
+import { getTicketValue } from './helpers';
 class Stats extends Component {
     constructor(props) {
         super(props);
@@ -39,106 +14,112 @@ class Stats extends Component {
         }
     }
 
-    async componentDidMount() {
-        const { scratchLottery } = this.props;
-
-        try {
-            const jackpot = await scratchLottery.jackpot();
-
-            this.setState({
-                jackpot: web3.utils.fromWei(jackpot),
-                loaded: true
-            });
-        } catch (e) {
-            console.log('ERROR', e)
-            this.setState({
-                jackpot: 0,
-                loaded: true,
-            })
-        }
-    }
-
     render() {
-        const { jackpot } = this.state;
-        const { cellValues, scratchLottery, account, ticket } = this.props;
+        const {
+            cellValues,
+            ticket,
+            jackpot,
+            purchaseTicket,
+            redeemTicket,
+            miningTicket,
+            miningPrize,
+        } = this.props;
         const numCellsRevealed = Object.keys(cellValues).length;
         const ticketValue = getTicketValue(cellValues);
         return (
             <React.Fragment>
-                <Alert variant="info">
-                    <strong>Jackpot:</strong> {jackpot} eth
+                <Alert variant="primary">
+                    <h5 className="mb-0"><strong>
+                        Jackpot: {jackpot} ETH
+                        <OverlayTrigger trigger="hover" placement="left" overlay={
+                            <Popover>
+                                This jackpot value is either 50 ETH (the highest possible ticket value)
+                                or all funds held by the contract.
+                            </Popover>
+                        }>
+                            <i className="fas fa-question-circle float-right"></i>
+                        </OverlayTrigger>
+                    </strong></h5>
                 </Alert>
                 <Alert variant="warning">
-                    <strong>{numCellsRevealed} / 12 cells revealed</strong>
+                    <h5 className="mb-0"><strong>{numCellsRevealed} / 12 cells revealed</strong></h5>
                 </Alert>
                 {
-                    ticket.redeemedAt && !!ticket.redeemedAt.toNumber() &&
-                    <Alert variant="info">
+                    !!ticket.redeemedAt.toNumber() &&
+                    <Alert variant="success">
                         <Alert.Heading as="h5"><strong>Ticket redeemed</strong></Alert.Heading>
                         <hr />
                         <p>
-                            You have already redeemed this ticket, purchase another ticket to play again.
+                            This ticket has been redeemed, purchase another ticket to play again.
                         </p>
                         <Button
-                            onClick={async () => {
-                                const newTicket = await scratchLottery.purchaseTicket({
-                                    from: account,
-                                    value: 5000000000000000
-                                })
-                                console.log('NEW TICKET', newTicket);
-                            }}
-                            variant="success"
+                            onClick={purchaseTicket}
+                            variant="primary"
                         >
                             Get a new ticket
                         </Button>
                     </Alert>
                 }
                 {
+                    !ticket.redeemedAt.toNumber() &&
                     numCellsRevealed === 12 && ticketValue > 0 &&
                     <Alert variant="success">
                         <Alert.Heading as="h5"><strong>Winner!</strong></Alert.Heading>
                         <hr />
                         <p>
-                            Congratulations, you can redeem your ticket for {ticketValue} eth.
+                            Congratulations, you can redeem your ticket for {ticketValue} ETH.
                         </p>
                         <Button
-                            onClick={async () => {
-                                const winningCellIndexes = getWinningCellIndexes(ticketValue, cellValues);
-                                console.log('WINNING INDEXES', winningCellIndexes)
-                                const redeemed = await scratchLottery.redeemWin(
-                                ...winningCellIndexes,
-                                {
-                                    from: account,
-                                    gas: 100000
-                                })
-                                console.log('TICKET REDEEMED', redeemed);
-                            }}
-                            variant="success"
+                            onClick={redeemTicket}
+                            variant="primary"
                         >
-                                Redeem {ticketValue} eth
+                                Redeem {ticketValue} ETH
                         </Button>
                     </Alert>
                 }
                 {
+                    !ticket.redeemedAt.toNumber() &&
                     numCellsRevealed === 12 && ticketValue === 0 &&
                     <Alert variant="danger">
-                        <Alert.Heading as="h5">Loser!</Alert.Heading>
+                        <Alert.Heading as="h5"><strong>Loser!</strong></Alert.Heading>
                         <hr />
                         <p>
                             You didn't win anything, purchase another ticket to play again.
                         </p>
                         <Button
-                            onClick={async () => {
-                                const newTicket = await scratchLottery.purchaseTicket({
-                                    from: account,
-                                    value: 5000000000000000
-                                })
-                                console.log('NEW TICKET', newTicket);
-                            }}
-                            variant="success"
+                            onClick={purchaseTicket}
+                            variant="primary"
                         >
-                                Get a new ticket
+                            Get a new ticket
                         </Button>
+                    </Alert>
+                }
+                {
+                    miningTicket &&
+                    <Alert variant="info">
+                        <Alert.Heading as="h5">
+                            <strong>Generating Ticket</strong>
+                            {' '}
+                            <Spinner animation="grow" size="sm"/>
+                        </Alert.Heading>
+                        <hr />
+                        <p>
+                            Please wait while your ticket is generated.
+                        </p>
+                    </Alert>
+                }
+                {
+                    miningPrize &&
+                    <Alert variant="info">
+                        <Alert.Heading as="h5">
+                            <strong>Redeeming Prize</strong>
+                            {' '}
+                            <Spinner animation="grow" size="sm"/>
+                        </Alert.Heading>
+                        <hr />
+                        <p>
+                            Please wait while your prize is redeemed.
+                        </p>
                     </Alert>
                 }
             </React.Fragment>
