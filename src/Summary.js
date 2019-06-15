@@ -7,6 +7,8 @@ import Popover from 'react-bootstrap/Popover';
 import Form from 'react-bootstrap/Form';
 import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 
+import { getTicketValue } from './helpers';
+
 class Toggle extends Component {
     render() {
         return (
@@ -17,8 +19,7 @@ class Toggle extends Component {
     }
 }
 
-import { getTicketValue } from './helpers';
-class Stats extends Component {
+class Summary extends Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -62,12 +63,17 @@ class Stats extends Component {
             redeemTicket,
             miningTicket,
             miningPrize,
+            currentBlockNumber
         } = this.props;
         const {
             donation
         } = this.state;
         const numCellsRevealed = Object.keys(cellValues).length;
         const ticketValue = getTicketValue(cellValues);
+        const ticketIsRedeemed = !!ticket.redeemedAt.toNumber();
+        const ticketIsWinner = numCellsRevealed === 12 && ticketValue > 0;
+        const ticketIsLoser = numCellsRevealed === 12 && ticketValue === 0;
+        const ticketIsExpired = ticket.redeemableAt.toNumber() <= currentBlockNumber - 254;
         return (
             <React.Fragment>
                 <Alert variant="primary">
@@ -144,9 +150,9 @@ class Stats extends Component {
                     <h5 className="mb-0"><strong>{numCellsRevealed} / 12 cells revealed</strong></h5>
                 </Alert>
                 {
-                    !!ticket.redeemedAt.toNumber() &&
+                    ticketIsRedeemed &&
                     <Alert variant="success">
-                        <Alert.Heading as="h5"><strong>Ticket redeemed</strong></Alert.Heading>
+                        <Alert.Heading as="h5"><strong>Ticket Redeemed</strong></Alert.Heading>
                         <hr />
                         <p>
                             This ticket has been redeemed, purchase another ticket to play again.
@@ -160,8 +166,7 @@ class Stats extends Component {
                     </Alert>
                 }
                 {
-                    !ticket.redeemedAt.toNumber() &&
-                    numCellsRevealed === 12 && ticketValue > 0 &&
+                    !ticketIsExpired && !ticketIsRedeemed && ticketIsWinner &&
                     <Alert variant="success">
                         <Alert.Heading as="h5"><strong>Winner!</strong></Alert.Heading>
                         <hr />
@@ -177,13 +182,30 @@ class Stats extends Component {
                     </Alert>
                 }
                 {
-                    !ticket.redeemedAt.toNumber() &&
-                    numCellsRevealed === 12 && ticketValue === 0 &&
+                    !ticketIsExpired && !ticketIsRedeemed && ticketIsLoser &&
                     <Alert variant="danger">
-                        <Alert.Heading as="h5"><strong>Loser!</strong></Alert.Heading>
+                        <Alert.Heading as="h5"><strong>No Prize This Time</strong></Alert.Heading>
                         <hr />
                         <p>
                             You didn't win anything, purchase another ticket to play again.
+                        </p>
+                        <Button
+                            onClick={purchaseTicket}
+                            variant="primary"
+                        >
+                            Get a new ticket
+                        </Button>
+                    </Alert>
+                }
+                {
+                    !ticketIsRedeemed && ticketIsExpired &&
+                    <Alert variant="danger">
+                        <Alert.Heading as="h5"><strong>Ticket is expired</strong></Alert.Heading>
+                        <hr />
+                        <p>
+                            Due to limitations in accessing ethereum block history,
+                            tickets expire 255 blocks after they are generated.
+                            Purchase a new ticket below.
                         </p>
                         <Button
                             onClick={purchaseTicket}
@@ -226,4 +248,4 @@ class Stats extends Component {
     }
 }
 
-export default Stats;
+export default Summary;

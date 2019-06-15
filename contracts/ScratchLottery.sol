@@ -47,7 +47,7 @@ contract ScratchLottery is Ownable {
     }
 
     function withdrawDonationsToOwner() public payable onlyOwner {
-        require(donationsToOwner > 0, 'No donations to withdraw');
+        require(donationsToOwner > 0, 'No donations for owner to withdraw');
         uint amountToWithdraw = donationsToOwner;
         donationsToOwner = 0;
         address(uint160(owner())).transfer(amountToWithdraw);
