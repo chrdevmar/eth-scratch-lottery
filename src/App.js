@@ -19,8 +19,8 @@ class App extends Component {
             scratchLottery: null,
             noWeb3: false,
             cellValues: {},
-            miningTicket: false,
-            miningPrize: false,
+            isMiningTicket: localStorage.getItem('isMiningTicket') === 'true',
+            isMiningPrize: localStorage.getItem('isMiningPrize') === 'true',
             jackpot: null,
             currentBlockNumber: null
         }
@@ -28,6 +28,12 @@ class App extends Component {
         this.redeemTicket = this.redeemTicket.bind(this);
         this.donateToContract = this.donateToContract.bind(this);
         this.donateToOwner = this.donateToOwner.bind(this);
+        this.hideMiningStatus = this.hideMiningStatus.bind(this);
+    }
+
+    hideMiningStatus(type) {
+        this.setState({ [type]: false});
+        localStorage.setItem(type, false);
     }
 
     async donateToContract(amount) {
@@ -57,16 +63,18 @@ class App extends Component {
     async purchaseTicket() {
         const { scratchLottery, account } = this.state;
         try {
+            localStorage.setItem('isMiningTicket', true)
             this.setState({
-                miningTicket: true
+                isMiningTicket: true
             })
             await scratchLottery.purchaseTicket({
                 from: account,
                 value: 5000000000000000
             })
         } catch (e) {
+            localStorage.setItem('isMiningTicket', false)
             this.setState({
-                miningTicket: false
+                isMiningTicket: false
             })
         }
     }
@@ -81,16 +89,18 @@ class App extends Component {
             from: account
         })
         try {
+            localStorage.setItem('isMiningPrize', true);
             this.setState({
-                miningPrize: true
+                isMiningPrize: true
             })
             await scratchLottery.redeemWin(...winningCellIndexes, {
                 from: account,
                 gas: Math.round(gasEstimate * 1.5)
             })
         } catch (e) {
+            localStorage.setItem('isMiningPrize', false);
             this.setState({
-                miningPrize: false
+                isMiningPrize: false
             })
         }
     }
@@ -119,8 +129,7 @@ class App extends Component {
 
             web3.eth.subscribe('newBlockHeaders')
             .on('data', async () => {
-                console.log('******NEW BLOCK HEADER ARRIVED*****')
-                const { miningPrize, miningTicket, ticket } = this.state;
+                const { isMiningPrize, isMiningTicket, ticket } = this.state;
                 const stateUpdates = {};
                 const jackpot = await scratchLottery.jackpot();
                 stateUpdates.jackpot = web3.utils.fromWei(jackpot);
@@ -128,27 +137,25 @@ class App extends Component {
                 const latestTicketInChain = await scratchLottery.getTicket({
                     from: account
                 });
-                console.log('CURRENTLY MINING TICKET?: ', miningTicket);
-                console.log('CURRENTLY MINING PRIZE?: ', miningPrize);
-                console.log('LATEST TICKET IN CHAIN', latestTicketInChain.id.toNumber());
-                console.log('CURRENT TICKET', ticket.id.toNumber());
-                if(miningTicket) {
+                if(isMiningTicket) {
                     if(latestTicketInChain.id.toNumber() > ticket.id.toNumber()) {
-                        if(await web3.eth.getBlock(ticket.redeemableAt.toNumber())) {
-                            console.log('resetting miningTicket flag');
-                            console.log('updating ticket', latestTicketInChain.id.toNumber());
-                            stateUpdates.ticket = latestTicketInChain
-                            stateUpdates.miningTicket = false;
-                            stateUpdates.cellValues = {};
+                        const syncedNextBlock = await web3.eth.getBlock(latestTicketInChain.redeemableAt.toNumber())
+                        if(!syncedNextBlock) {
+
+                            // node should catch up in 5 seconds
+                            await new Promise(resolve => setTimeout(resolve, 5000));
                         }
+                        stateUpdates.ticket = latestTicketInChain;
+                        localStorage.setItem('isMiningTicket', false);
+                        stateUpdates.isMiningTicket = false;
+                        stateUpdates.cellValues = {};
                     }
                 }
-                if(miningPrize) {
+                if(isMiningPrize) {
                     if(latestTicketInChain.redeemedAt.toNumber()) {
-                        console.log('resetting miningPrize flag');
-                        console.log('updating ticket', latestTicketInChain.id.toNumber());
-                        stateUpdates.ticket = latestTicketInChain
-                        stateUpdates.miningPrize = false;
+                        stateUpdates.ticket = latestTicketInChain;
+                        localStorage.setItem('isMiningPrize', false);
+                        stateUpdates.isMiningPrize = false;
                     }
                 }
                 this.setState(stateUpdates);
@@ -171,8 +178,8 @@ class App extends Component {
             ticket,
             jackpot,
             ticketLoaded,
-            miningPrize,
-            miningTicket,
+            isMiningPrize,
+            isMiningTicket,
             currentBlockNumber
         } = this.state;
         return (
@@ -216,12 +223,13 @@ class App extends Component {
                                     ticket={ticket}
                                     purchaseTicket={this.purchaseTicket}
                                     redeemTicket={this.redeemTicket}
-                                    miningTicket={miningTicket}
-                                    miningPrize={miningPrize}
+                                    isMiningTicket={isMiningTicket}
+                                    isMiningPrize={isMiningPrize}
                                     jackpot={jackpot}
                                     donateToContract={this.donateToContract}
                                     donateToOwner={this.donateToOwner}
                                     currentBlockNumber={currentBlockNumber}
+                                    hideMiningStatus={this.hideMiningStatus}
                                 />,
                                 document.getElementById('stats')
                             )}

@@ -8,7 +8,7 @@
     "remix": "npx remixd -s . --remix-ide https://remix.ethereum.org",
     "start": "npx webpack && npx webpack-dev-server",
     "deploy:ropsten": "npx dotenv -- npx truffle deploy --network ropsten",
-    "build:app": "npx webpack && aws s3 sync ./dist s3://ethscratchies.cmartin.co",
+    "build:app": "npx webpack --mode=production && aws s3 sync ./dist s3://ethscratchies.cmartin.co",
     "invalidate:app": "aws cloudfront create-invalidation --distribution-id E209KNEHYHJP46 --paths /*",
     "deploy:app": "npm run build:app && npm run invalidate:app"
   },

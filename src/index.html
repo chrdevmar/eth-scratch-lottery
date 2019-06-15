@@ -25,32 +25,32 @@
   </head>
   <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-5">
-      <a class="navbar-brand mx-5" href="#"><h4 class="mb-0">Ethereum Scratchies</h4></a>
+      <a class="navbar-brand mx-5" href="#"><h4 class="mb-0"><strong>Ethereum Scratchies</strong></h4></a>
     </nav>
-    <div class="mx-2 mx-md-5">
+    <div class="mx-3 mx-md-5">
       <div class="row d-flex justify-content-center">
-        <div class="order-md-1 order-3 col-sm-12 col-md-4 col-lg-3">
+        <div class="order-md-1 order-3 col-sm-12 col-md-4 col-xl-3">
           <div class="alert alert-primary" role="alert">
             <h5 class="alert-heading"><strong>Welcome to Ethereum Scratchies!</strong></h5>
-            <p>A transparent scratch lottery game on the Ethereum blockchain</p>
-            <hr>
+            <p class="mb-1">A transparent scratch lottery game on the Ethereum blockchain</p>
+            <hr class="my-1"/>
             <h5 class="alert-heading text-strong"><strong>How to play</strong></h5>
-            <p class="mb-0">
+            <p class="mb-1">
               Simply buy a ticket, wait for it to be mined and then <i>scratch</i> the cells to reveal their values.
               Reveal 3 or more matching values to win that amount of ether.
             </p>
-            <hr>
+            <hr class="my-1"/>
             <h5 class="alert-heading text-strong"><strong>How it works</strong></h5>
-            <p class="mb-0">
+            <p class="mb-1">
               Each of the 12 cells on a ticket is converted to a unique and unpredictable hash of 32 digits. Each of these digits hold a value between 0 and 255.
               Cells are assigned an ether value based on how many of the first 5 digits of this hash are between 0 and 12.
             </p>
           </div>
         </div>
-        <div class="order-md-2 order-1 col-sm-12 col-md-4 col-lg-3">
+        <div class="order-md-2 order-1 col-sm-12 col-md-4 col-xl-3">
           <div id="app"></div>
         </div>
-        <div class="order-md-3 order-2 col-sm-12 col-md-4 col-lg-3">
+        <div class="order-md-3 order-2 col-sm-12 col-md-4 col-xl-3">
           <div id="stats"></div>
         </div>
       </div>
