@@ -120,7 +120,12 @@ class App extends Component {
             const web3Provider = await loadWeb3();
             ScratchLottery.setProvider(web3Provider);
             let scratchLottery;
-            const scratchLottery = await ScratchLottery.deployed();
+            try {
+                scratchLottery = await ScratchLottery.deployed();
+            } catch (e) {
+                alert(`${e.message}, please use ropsten testnet.`)
+                this.setState({loaded: true})
+            }
             const [account] = await web3.eth.getAccounts();
             const ticket = await scratchLottery.getTicket({
                 from: account
@@ -147,7 +152,8 @@ class App extends Component {
                 etherscanLink,
                 jackpot,
                 defaultTicketPrice: web3.utils.fromWei(ticket.price),
-                ticketLoaded: true
+                ticketLoaded: true,
+                loaded: true
             });
 
             web3.eth.subscribe('newBlockHeaders')
@@ -203,7 +209,8 @@ class App extends Component {
             isMiningTicket,
             currentBlockNumber,
             etherscanLink,
-            defaultTicketPrice
+            defaultTicketPrice,
+            loaded
         } = this.state;
         return (
             <React.Fragment>
@@ -222,7 +229,7 @@ class App extends Component {
                     </Alert>
                 }
                 {
-                    scratchLottery ? (
+                    loaded && !noWeb3 ? (
                         <React.Fragment>
                             {ReactDOM.createPortal(
                                 <AppInfo
