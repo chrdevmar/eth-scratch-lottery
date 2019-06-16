@@ -36,23 +36,23 @@
     background-color: lightgray
 }
 
-.cell.revealed.value-0005 {
+.cell.revealed.value-1 {
     background-color: #20BC62
 }
 
-.cell.revealed.value-005 {
+.cell.revealed.value-2 {
     background-color: #FFA552
 }
 
-.cell.revealed.value-05 {
+.cell.revealed.value-3 {
     background-color: rgb(69, 118, 173)
 }
 
-.cell.revealed.value-5 {
+.cell.revealed.value-4 {
     background-color: #513B56
 }
 
-.cell.revealed.value-50 {
+.cell.revealed.value-5 {
     background-color: rgb(199, 174, 61)
 }
 

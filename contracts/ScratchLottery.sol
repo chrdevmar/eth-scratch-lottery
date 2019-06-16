@@ -4,10 +4,9 @@ import 'openzeppelin-solidity/contracts/ownership/Ownable.sol';
 
 /** @title Scratch Lottery */
 contract ScratchLottery is Ownable {
-    // .005 eth = 5000000000000000 wei
-    uint public ticketPrice = .005 ether;
-    uint public prizeMultiplier = .005 ether;
+    uint public minTicketPrice = .00001 ether;
     uint public ticketCount = 0;
+    /** amount withdrawable by contract owner */
     uint public donationsToOwner = 0 ether;
 
     struct Ticket {
@@ -15,6 +14,7 @@ contract ScratchLottery is Ownable {
         uint blockNumber; // block number at time of buying ticket
         uint redeemableAt; // block height when user can redeem ticket
         uint redeemedAt; // timestamp of when user redeemed ticket
+        uint price; // ticket price as specified by player
     }
 
     mapping(address => Ticket) public players;
@@ -29,6 +29,10 @@ contract ScratchLottery is Ownable {
         return address(this).balance;
     }
 
+    /**
+        Accepts donations and increments the amount withdrawable
+        by contract owner
+    */
     function donateToOwner() public payable {
         donationsToOwner += msg.value;
         emit DonationReceived();
@@ -38,14 +42,10 @@ contract ScratchLottery is Ownable {
         emit DonationReceived();
     }
 
-    function jackpot () public view returns (uint) {
-        uint maxPayout = prizeMultiplier ** 5;
-        if(address(this).balance < maxPayout) {
-            return address(this).balance;
-        }
-        return maxPayout;
-    }
-
+    /**
+        Withdraws all funds that contrat owner is allowed to access.
+        Players must specifically choose to donate to owner to give them access.
+    */
     function withdrawDonationsToOwner() public payable onlyOwner {
         require(donationsToOwner > 0, 'No donations for owner to withdraw');
         uint amountToWithdraw = donationsToOwner;
@@ -55,7 +55,8 @@ contract ScratchLottery is Ownable {
 
     function purchaseTicket() public payable {
         // require payment to run
-        require(msg.value >= ticketPrice, 'Tickets cost 0.005 eth');
+
+        require(msg.value >= minTicketPrice, 'Minimum ticket price is 0.00001 ether');
 
         ticketCount++;
 
@@ -63,11 +64,10 @@ contract ScratchLottery is Ownable {
             id: ticketCount,
             blockNumber: block.number,
             redeemableAt: block.number + 1,
-            redeemedAt: 0
+            redeemedAt: 0,
+            price: msg.value
         });
 
-        // return any overpayment to the sender
-        msg.sender.transfer(msg.value - ticketPrice);
         emit TicketPurchased(msg.sender, ticketCount);
     }
 
@@ -75,25 +75,30 @@ contract ScratchLottery is Ownable {
         uint id,
         uint blockNumber,
         uint redeemableAt,
-        uint redeemedAt
+        uint redeemedAt,
+        uint price
     ) {
         Ticket memory ticket = players[msg.sender];
-        return (ticket.id, ticket.blockNumber, ticket.redeemableAt, ticket.redeemedAt);
+        return (ticket.id, ticket.blockNumber, ticket.redeemableAt, ticket.redeemedAt, ticket.price);
     }
 
+    /**
+        @dev counts the number of values between 0 and 18 in the first 5 digits of a 32 byte hex hash
+    */
     function countTargetsInFirst5Bytes(bytes32 _hash) internal pure returns(uint8) {
         uint8 count = 0;
         for(uint8 i = 0; i < 5; i++) {
-            if(uint8(_hash[i]) >= 0 && uint8(_hash[i]) <= 12) {
+            if(uint8(_hash[i]) >= 0 && uint8(_hash[i]) <= 18) {
                 count++;
             }
         }
         return count;
     }
+
     /**
      * given 3 unique cells on a ticket,
      * awards a win if hashes of all 3 cells contain the same number of zeros in their hash
-     * prize is .05 ether * number of zeros
+     * prize is <ticket.price> ^ number of targets
      */
     function redeemWin(uint _index1, uint _index2, uint _index3) public {
         require(
@@ -114,7 +119,7 @@ contract ScratchLottery is Ownable {
             nextBlockHash != 0x0000000000000000000000000000000000000000000000000000000000000000,
             'Ticket is expired'
         );
-        // get the number of bytes that are between 0 and 8 (inclusive) in the first 5 bytes of each cell
+        // get the number of bytes that are between 0 and 18 (inclusive) in the first 5 bytes of each cell
         bytes32 _hash1 = keccak256(abi.encodePacked(msg.sender,ticket.id,_index1,nextBlockHash));
         uint count1 = countTargetsInFirst5Bytes(_hash1);
 
@@ -128,7 +133,7 @@ contract ScratchLottery is Ownable {
         require(count1 == count2 && count2 == count3, '3 matches required to win');
         // mark the ticket as redeemed
         require(count1 > 0, 'Ticket is not a winner');
-        uint payout = prizeMultiplier * (10 ** (count1 - 1));
+        uint payout = ticket.price * (10 ** (count1 - 1));
         if(payout > address(this).balance) {
             payout = address(this).balance;
         }

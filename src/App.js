@@ -4,12 +4,19 @@ import contract from 'truffle-contract';
 import ScratchLotteryContract from '../build/contracts/ScratchLottery.json';
 import loadWeb3 from './loadWeb3';
 
-import { getCellValue, getWinningCellIndexes, getTicketValue } from './helpers';
+import {
+    getCellPower,
+    getWinningCellIndexes,
+    getTicketValue,
+    getTicketJackpot,
+    getTicketPower
+} from './helpers';
 
 import Alert from 'react-bootstrap/Alert';
 import Spinner from 'react-bootstrap/Spinner';
 import Ticket from './Ticket';
 import Summary from './Summary';
+import AppInfo from './AppInfo';
 
 class App extends Component {
     constructor(props) {
@@ -18,7 +25,7 @@ class App extends Component {
             blockNumber: 0,
             scratchLottery: null,
             noWeb3: false,
-            cellValues: {},
+            cellPowers: {},
             isMiningTicket: localStorage.getItem('isMiningTicket') === 'true',
             isMiningPrize: localStorage.getItem('isMiningPrize') === 'true',
             jackpot: null,
@@ -37,30 +44,30 @@ class App extends Component {
     }
 
     async donateToContract(amount) {
-        const { scratchLottery, account } = this.state;
+        const { ticket, scratchLottery, account } = this.state;
         await scratchLottery.donateToContract({
             value: web3.utils.toWei(amount),
             from: account
         });
-        const jackpot = await scratchLottery.jackpot();
+        const jackpot = await getTicketJackpot(ticket, scratchLottery);
         this.setState({
-            jackpot: web3.utils.fromWei(jackpot)
+            jackpot
         })
     }
 
     async donateToOwner(amount) {
-        const { scratchLottery, account } = this.state;
+        const { ticket, scratchLottery, account } = this.state;
         await scratchLottery.donateToOwner({
             value: web3.utils.toWei(amount),
             from: account
         });
-        const jackpot = await scratchLottery.jackpot();
+        const jackpot = await getTicketJackpot(ticket, scratchLottery);
         this.setState({
-            jackpot: web3.utils.fromWei(jackpot)
+            jackpot
         })
     }
 
-    async purchaseTicket() {
+    async purchaseTicket(price) {
         const { scratchLottery, account } = this.state;
         try {
             localStorage.setItem('isMiningTicket', true)
@@ -69,7 +76,7 @@ class App extends Component {
             })
             await scratchLottery.purchaseTicket({
                 from: account,
-                value: 5000000000000000
+                value: price * web3.utils.toWei('1')
             })
         } catch (e) {
             localStorage.setItem('isMiningTicket', false)
@@ -80,10 +87,10 @@ class App extends Component {
     }
 
     async redeemTicket() {
-        const { scratchLottery, account, cellValues } = this.state;
+        const { scratchLottery, account, cellPowers, ticket } = this.state;
 
-        const ticketValue = getTicketValue(cellValues);
-        const winningCellIndexes = getWinningCellIndexes(ticketValue, cellValues);
+        const ticketPower = getTicketPower(cellPowers)
+        const winningCellIndexes = getWinningCellIndexes(ticketPower, cellPowers);
         const gasEstimate = await scratchLottery.methods["redeemWin(uint256,uint256,uint256)"]
         .estimateGas(...winningCellIndexes, {
             from: account
@@ -112,7 +119,10 @@ class App extends Component {
             ScratchLottery.setProvider(web3Provider)
             const scratchLottery = await ScratchLottery.deployed();
             const [account] = await web3.eth.getAccounts();
-            const jackpot = await scratchLottery.jackpot();
+            const ticket = await scratchLottery.getTicket({
+                from: account
+            });
+            const jackpot = await getTicketJackpot(ticket, scratchLottery);
             const currentBlockNumber = await web3.eth.getBlockNumber();
             let etherscanLink = `etherscan.io/address/${scratchLottery.address}`
             const networkName = await web3.eth.net.getNetworkType();
@@ -125,9 +135,6 @@ class App extends Component {
                     break;
             }
 
-            const ticket = await scratchLottery.getTicket({
-                from: account
-            });
 
             this.setState({
                 scratchLottery,
@@ -135,16 +142,15 @@ class App extends Component {
                 account,
                 currentBlockNumber,
                 etherscanLink,
-                jackpot: web3.utils.fromWei(jackpot),
+                jackpot,
                 ticketLoaded: true
             });
 
             web3.eth.subscribe('newBlockHeaders')
             .on('data', async () => {
-                const { isMiningPrize, isMiningTicket, ticket } = this.state;
+                const { isMiningPrize, isMiningTicket, ticket, scratchLottery } = this.state;
                 const stateUpdates = {};
-                const jackpot = await scratchLottery.jackpot();
-                stateUpdates.jackpot = web3.utils.fromWei(jackpot);
+                stateUpdates.jackpot = await getTicketJackpot(ticket, scratchLottery);
                 stateUpdates.currentBlockNumber = await web3.eth.getBlockNumber();
                 const latestTicketInChain = await scratchLottery.getTicket({
                     from: account
@@ -152,15 +158,14 @@ class App extends Component {
                 if(isMiningTicket) {
                     if(latestTicketInChain.id.toNumber() > ticket.id.toNumber()) {
                         const syncedNextBlock = await web3.eth.getBlock(latestTicketInChain.redeemableAt.toNumber())
-                        if(!syncedNextBlock) {
-
+                        if(!syncedNextBlock && networkName !== 'private') {
                             // node should catch up in 5 seconds
                             await new Promise(resolve => setTimeout(resolve, 5000));
                         }
                         stateUpdates.ticket = latestTicketInChain;
                         localStorage.setItem('isMiningTicket', false);
                         stateUpdates.isMiningTicket = false;
-                        stateUpdates.cellValues = {};
+                        stateUpdates.cellPowers = {};
                     }
                 }
                 if(isMiningPrize) {
@@ -186,7 +191,7 @@ class App extends Component {
             scratchLottery,
             account,
             noWeb3,
-            cellValues,
+            cellPowers,
             ticket,
             jackpot,
             ticketLoaded,
@@ -204,48 +209,54 @@ class App extends Component {
                         <hr />
                         <p>
                             We couldn't find the write wiring for your web browser to communicate with the blockchain.
+                            You need to use a browser wallet that provides access to web3.
                         </p>
                         <p>
-                        <a href="https://metamask.io/">Click here</a> to learn about MetaMask.
+                        <a href="https://metamask.io/">Click here</a> to learn about MetaMask, the most common browser wallet.
                         </p>
                     </Alert>
                 }
                 {
                     scratchLottery ? (
                         <React.Fragment>
+                            {ReactDOM.createPortal(
+                                <AppInfo
+                                    donateToContract={this.donateToContract}
+                                    donateToOwner={this.donateToOwner}
+                                    etherscanLink={etherscanLink}
+                                />,
+                                document.getElementById('appinfo')
+                            )}
                             <Ticket
                                 scratchLottery={scratchLottery}
                                 account={account}
                                 onCellClick={async (index) => {
-                                    const cellValue = await getCellValue(account, ticket, index)
+                                    const cellPower = await getCellPower(account, ticket, index)
                                     this.setState({
-                                        cellValues: {
-                                            ...cellValues,
-                                            [index]: cellValue
+                                        cellPowers: {
+                                            ...cellPowers,
+                                            [index]: cellPower
                                         }
                                     })
                                 }}
-                                cellValues={cellValues}
+                                cellPowers={cellPowers}
                                 ticket={ticket}
                                 ticketLoaded={ticketLoaded}
                                 purchaseTicket={this.purchaseTicket}
+                                jackpot={jackpot}
                             />
                             {ReactDOM.createPortal(
                                 <Summary
-                                    cellValues={cellValues}
+                                    cellPowers={cellPowers}
                                     ticket={ticket}
                                     purchaseTicket={this.purchaseTicket}
                                     redeemTicket={this.redeemTicket}
                                     isMiningTicket={isMiningTicket}
                                     isMiningPrize={isMiningPrize}
-                                    jackpot={jackpot}
-                                    donateToContract={this.donateToContract}
-                                    donateToOwner={this.donateToOwner}
                                     currentBlockNumber={currentBlockNumber}
                                     hideMiningStatus={this.hideMiningStatus}
-                                    etherscanLink={etherscanLink}
                                 />,
-                                document.getElementById('stats')
+                                document.getElementById('summary')
                             )}
                         </React.Fragment>
                     ) : (

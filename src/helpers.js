@@ -1,16 +1,10 @@
-export const getCellValue = async function(account, ticket, index) {
+export const getCellPower = async function(account, ticket, index) {
     const redeemableAtBlock = await web3.eth.getBlock(ticket.redeemableAt.toNumber());
     const nextHashAsBytes = chunkHexString(redeemableAtBlock.hash);
     const bytesArgs = nextHashAsBytes.map(byte => ({t: 'bytes', v: byte}));
 
     const cellHash = web3.utils.soliditySha3(account, ticket.id.toNumber(), index, ...bytesArgs);
-    const targetCount = countTargetsInFirstFiveBytes(cellHash);
-
-    let cellValue = 0;
-    if(targetCount > 0) {
-        cellValue = 0.005 * (10 ** (targetCount - 1));
-    }
-    return cellValue;
+    return countTargetsInFirstFiveBytes(cellHash);
 }
 
 function chunkHexString(hexStr) {
@@ -23,7 +17,7 @@ function chunkHexString(hexStr) {
 
 export const simulate = function() {
     const values = {};
-    let numSimulations = 500000
+    let numSimulations = 10000
     for(let i = 0; i < numSimulations; i++) {
         const simulatedCardValue = simulateCard(i);
         values[simulatedCardValue] = values[simulatedCardValue] || 0;
@@ -52,7 +46,7 @@ function simulateCard(cardNum) {
 
         let cellValue = 0;
         if(targetCount > 0) {
-            cellValue = 0.005 * (10 ** (targetCount-1));
+            cellValue = 0.005 * (10 ** (targetCount - 1));
         }
         cells[`${cellValue}`] = cells[`${cellValue}`] || 0;
         cells[`${cellValue}`]++;
@@ -72,38 +66,58 @@ function countTargetsInFirstFiveBytes(hash) {
 
     for(let i = 2; i < 12; i += 2) {
         const value = parseInt(`0x${hash.charAt(i)}${hash.charAt(i+1)}`);
-        if(value >= 0 && value <= 12) {
+        if(value >= 0 && value <= 18) {
             count++;
         }
     }
     return count;
 }
 
-export const getTicketValue = function(cellValues) {
-    let valueCounts = {};
-    Object.values(cellValues).forEach(cellValue => {
-        valueCounts[cellValue] = valueCounts[cellValue] || 0;
-        valueCounts[cellValue]++;
+export const getTicketPower = function(cellPowers) {
+    let powerCounts = {};
+    Object.values(cellPowers).forEach(cellPower => {
+        powerCounts[cellPower] = powerCounts[cellPower] || 0;
+        powerCounts[cellPower]++;
     });
 
-    let ticketValue = 0;
-    for(let value in valueCounts) {
-        if(valueCounts[value] >= 3 && Number(value) > ticketValue) {
-            ticketValue = Number(value);
+    let ticketPower = 0;
+    for(let power in powerCounts) {
+        if(powerCounts[power] >= 3 && power > ticketPower) {
+            ticketPower = power;
         }
+    }
+    return Number(ticketPower);
+}
+
+export const getTicketJackpot = async function(ticket, scratchLottery) {
+    const maxTicketJackpot = web3.utils.fromWei(ticket.price) * 10000;
+    const contractBalance = web3.utils.fromWei(await scratchLottery.balance());
+    if(contractBalance < maxTicketJackpot) {
+        return contractBalance;
+    }
+    return maxTicketJackpot;
+}
+
+export const getTicketValue = function(ticket, ticketPower) {
+    let ticketValue = 0;
+    if(ticketPower > 0) {
+        ticketValue = web3.utils.fromWei(ticket.price) * (10 ** (ticketPower - 1));
     }
     return ticketValue;
 }
 
-export const getWinningCellIndexes = function (ticketValue, cellValues) {
+export const getWinningCellIndexes = function (ticketPower, cellPowers) {
     const winningCellIndexes = [];
-    for(let cellIndex in cellValues) {
+    for(let cellIndex in cellPowers) {
+        console.log('inspecting cell index', cellIndex, typeof ticketPower)
         if(winningCellIndexes.length === 3) {
             continue;
         }
-        if(Number(cellValues[cellIndex]) === ticketValue) {
+        console.log('cell power', cellPowers[cellIndex])
+        if(cellPowers[cellIndex] === ticketPower) {
             winningCellIndexes.push(Number(cellIndex))
         }
     }
+    console.log(ticketPower, cellPowers, winningCellIndexes);
     return winningCellIndexes;
 }
