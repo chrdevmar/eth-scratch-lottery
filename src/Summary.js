@@ -2,12 +2,10 @@ import React, { Component } from 'react';
 import Alert from 'react-bootstrap/Alert';
 import Button from 'react-bootstrap/Button';
 import Spinner from 'react-bootstrap/Spinner';
-import Accordion from 'react-bootstrap/Accordion';
-import Popover from 'react-bootstrap/Popover';
-import Form from 'react-bootstrap/Form';
-import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 
-import { getTicketPower, getTicketValue, simulate } from './helpers';
+import { getTicketPower, getTicketValue } from './helpers';
+
+import TicketForm from './TicketForm';
 
 class Summary extends Component {
     render() {
@@ -20,6 +18,7 @@ class Summary extends Component {
             isMiningPrize,
             currentBlockNumber,
             hideMiningStatus,
+            defaultTicketPrice
         } = this.props;
         const numCellsRevealed = Object.keys(cellPowers).length;
         const ticketPower = getTicketPower(cellPowers);
@@ -47,12 +46,7 @@ class Summary extends Component {
                         <p>
                             This ticket has been redeemed, purchase another ticket to play again.
                         </p>
-                        <Button
-                            onClick={() => purchaseTicket(.005)}
-                            variant="primary"
-                        >
-                            Get a new ticket
-                        </Button>
+                        <TicketForm defaultTicketPrice={defaultTicketPrice} purchaseTicket={purchaseTicket}/>
                     </Alert>
                 }
                 {
@@ -79,16 +73,11 @@ class Summary extends Component {
                         <p>
                             You didn't win anything, purchase another ticket to play again.
                         </p>
-                        <Button
-                            onClick={() => purchaseTicket(.005)}
-                            variant="primary"
-                        >
-                            Get a new ticket
-                        </Button>
+                        <TicketForm defaultTicketPrice={defaultTicketPrice} purchaseTicket={purchaseTicket}/>
                     </Alert>
                 }
                 {
-                    !isMiningTicket && !ticketIsRedeemed && ticketIsExpired &&
+                    !!ticket.id.toNumber() && !isMiningTicket && !ticketIsRedeemed && ticketIsExpired &&
                     <Alert variant="danger">
                         <Alert.Heading as="h5"><strong>Ticket is expired</strong></Alert.Heading>
                         <hr className="my-1" />
@@ -97,12 +86,7 @@ class Summary extends Component {
                             tickets expire 255 blocks after they are generated.
                             Purchase a new ticket below.
                         </p>
-                        <Button
-                            onClick={() => purchaseTicket(.005)}
-                            variant="primary"
-                        >
-                            Get a new ticket
-                        </Button>
+                        <TicketForm defaultTicketPrice={defaultTicketPrice} purchaseTicket={purchaseTicket}/>
                     </Alert>
                 }
                 {
@@ -141,7 +125,6 @@ class Summary extends Component {
                         </span>
                     </Alert>
                 }
-                <Button variant="info" onClick={simulate}>Simulate</Button>
             </React.Fragment>
         )
     }

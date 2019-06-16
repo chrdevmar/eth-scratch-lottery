@@ -3,6 +3,7 @@ import Alert from 'react-bootstrap/Alert';
 import Button from 'react-bootstrap/Button';
 import Accordion from 'react-bootstrap/Accordion';
 import Form from 'react-bootstrap/Form';
+import InputGroup from 'react-bootstrap/InputGroup';
 
 class AppInfo extends Component {
     constructor(props) {
@@ -89,18 +90,23 @@ class AppInfo extends Component {
                                         />
                                     </Form.Group>
                                     <Form.Group controlId="amount">
-                                        <Form.Label>Amount</Form.Label>
-                                        <Form.Control
-                                            onChange={this.handleChange}
-                                            type="number"
-                                            placeholder="amount (eth)"
-                                            name="amount"
-                                            value={donation.amount}
-                                        />
+                                        <Form.Label>Donation Amount</Form.Label>
+                                        <InputGroup className="mb-3">
+                                            <Form.Control
+                                                onChange={this.handleChange}
+                                                type="number"
+                                                required
+                                                placeholder="Amount (ETH)"
+                                                name="amount"
+                                                value={donation.amount}
+                                                aria-label="Donation Amount"
+                                                aria-describedby="Donation Amount"
+                                            />
+                                            <InputGroup.Append>
+                                                <Button variant="primary" type="submit">Donate</Button>
+                                            </InputGroup.Append>
+                                        </InputGroup>
                                     </Form.Group>
-                                    <Button variant="primary" type="submit">
-                                        Donate
-                                    </Button>
                                 </Form>
                             </div>
                         </Accordion.Collapse>

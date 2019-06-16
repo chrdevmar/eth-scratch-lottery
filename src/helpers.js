@@ -109,15 +109,12 @@ export const getTicketValue = function(ticket, ticketPower) {
 export const getWinningCellIndexes = function (ticketPower, cellPowers) {
     const winningCellIndexes = [];
     for(let cellIndex in cellPowers) {
-        console.log('inspecting cell index', cellIndex, typeof ticketPower)
         if(winningCellIndexes.length === 3) {
             continue;
         }
-        console.log('cell power', cellPowers[cellIndex])
         if(cellPowers[cellIndex] === ticketPower) {
             winningCellIndexes.push(Number(cellIndex))
         }
     }
-    console.log(ticketPower, cellPowers, winningCellIndexes);
     return winningCellIndexes;
 }

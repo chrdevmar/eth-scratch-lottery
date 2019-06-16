@@ -7,7 +7,6 @@ import loadWeb3 from './loadWeb3';
 import {
     getCellPower,
     getWinningCellIndexes,
-    getTicketValue,
     getTicketJackpot,
     getTicketPower
 } from './helpers';
@@ -29,7 +28,8 @@ class App extends Component {
             isMiningTicket: localStorage.getItem('isMiningTicket') === 'true',
             isMiningPrize: localStorage.getItem('isMiningPrize') === 'true',
             jackpot: null,
-            currentBlockNumber: null
+            currentBlockNumber: null,
+            defaultTicketPrice: 0.005
         }
         this.purchaseTicket = this.purchaseTicket.bind(this);
         this.redeemTicket = this.redeemTicket.bind(this);
@@ -68,17 +68,19 @@ class App extends Component {
     }
 
     async purchaseTicket(price) {
-        const { scratchLottery, account } = this.state;
+        const { scratchLottery, account,  } = this.state;
         try {
             localStorage.setItem('isMiningTicket', true)
             this.setState({
-                isMiningTicket: true
+                isMiningTicket: true,
+                defaultTicketPrice: price,
             })
             await scratchLottery.purchaseTicket({
                 from: account,
                 value: price * web3.utils.toWei('1')
             })
         } catch (e) {
+            console.log('ERROR', e)
             localStorage.setItem('isMiningTicket', false)
             this.setState({
                 isMiningTicket: false
@@ -116,7 +118,8 @@ class App extends Component {
         try {
             const ScratchLottery = contract(ScratchLotteryContract)
             const web3Provider = await loadWeb3();
-            ScratchLottery.setProvider(web3Provider)
+            ScratchLottery.setProvider(web3Provider);
+            let scratchLottery;
             const scratchLottery = await ScratchLottery.deployed();
             const [account] = await web3.eth.getAccounts();
             const ticket = await scratchLottery.getTicket({
@@ -143,6 +146,7 @@ class App extends Component {
                 currentBlockNumber,
                 etherscanLink,
                 jackpot,
+                defaultTicketPrice: web3.utils.fromWei(ticket.price),
                 ticketLoaded: true
             });
 
@@ -150,11 +154,11 @@ class App extends Component {
             .on('data', async () => {
                 const { isMiningPrize, isMiningTicket, ticket, scratchLottery } = this.state;
                 const stateUpdates = {};
-                stateUpdates.jackpot = await getTicketJackpot(ticket, scratchLottery);
                 stateUpdates.currentBlockNumber = await web3.eth.getBlockNumber();
                 const latestTicketInChain = await scratchLottery.getTicket({
                     from: account
                 });
+                stateUpdates.jackpot = await getTicketJackpot(latestTicketInChain, scratchLottery);
                 if(isMiningTicket) {
                     if(latestTicketInChain.id.toNumber() > ticket.id.toNumber()) {
                         const syncedNextBlock = await web3.eth.getBlock(latestTicketInChain.redeemableAt.toNumber())
@@ -198,7 +202,8 @@ class App extends Component {
             isMiningPrize,
             isMiningTicket,
             currentBlockNumber,
-            etherscanLink
+            etherscanLink,
+            defaultTicketPrice
         } = this.state;
         return (
             <React.Fragment>
@@ -244,6 +249,7 @@ class App extends Component {
                                 ticketLoaded={ticketLoaded}
                                 purchaseTicket={this.purchaseTicket}
                                 jackpot={jackpot}
+                                defaultTicketPrice={defaultTicketPrice}
                             />
                             {ReactDOM.createPortal(
                                 <Summary
@@ -255,6 +261,7 @@ class App extends Component {
                                     isMiningPrize={isMiningPrize}
                                     currentBlockNumber={currentBlockNumber}
                                     hideMiningStatus={this.hideMiningStatus}
+                                    defaultTicketPrice={defaultTicketPrice}
                                 />,
                                 document.getElementById('summary')
                             )}

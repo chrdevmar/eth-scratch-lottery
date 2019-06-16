@@ -2,15 +2,14 @@ import React, { Component } from 'react';
 import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import Popover from 'react-bootstrap/Popover';
 import Card from 'react-bootstrap/Card';
-import Button from 'react-bootstrap/Button';
 import Spinner from 'react-bootstrap/Spinner';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 
-import { getTicketPower, getTicketValue } from './helpers';
-
 import './Cell.css';
 import './Ticket.css';
+
+import TicketForm from './TicketForm';
 
 const cellValueClassMappings = {
     0: 'value-0',
@@ -48,6 +47,7 @@ class Ticket extends Component {
             ticket,
             ticketLoaded,
             purchaseTicket,
+            defaultTicketPrice,
             jackpot
         } = this.props;
 
@@ -106,17 +106,12 @@ class Ticket extends Component {
                         <Card>
                             <Card.Body className="text-center">
                                 <Card.Title><strong>You have no ticket</strong></Card.Title>
-                                <Card.Subtitle className="mb-2 text-muted">you should get one</Card.Subtitle>
+                                <Card.Subtitle className="mb-2 text-muted">Buy one below</Card.Subtitle>
                                 <hr/>
-                                <Card.Text>
-                                    Tickets cost .005 ETH and take one block (10-20 seconds) to mine
-                                </Card.Text>
-                                <Button
-                                    onClick={() => purchaseTicket(.005)}
-                                    variant="success"
-                                >
-                                    Get a ticket
-                                </Button>
+                                <div className="text-left mb-2">
+                                    <strong>The more you pay for your ticket, the higher your potential reward</strong>
+                                </div>
+                                <TicketForm defaultTicketPrice={defaultTicketPrice} purchaseTicket={purchaseTicket}/>
                             </Card.Body>
                         </Card>
                     )
