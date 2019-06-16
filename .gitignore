@@ -3,4 +3,3 @@ node_modules
 schema
 dist
 .env
-.build
