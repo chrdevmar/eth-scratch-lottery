@@ -8,8 +8,8 @@
     "remix": "npx remixd -s . --remix-ide https://remix.ethereum.org",
     "start": "npx webpack && npx webpack-dev-server",
     "deploy:ropsten": "npx dotenv -- npx truffle deploy --network ropsten",
-    "build:app": "npx webpack --mode=production && aws s3 sync ./dist s3://ethscratchies.cmartin.co",
-    "invalidate:app": "aws cloudfront create-invalidation --distribution-id E209KNEHYHJP46 --paths /*",
+    "build:app": "npx webpack --mode=production && aws s3 sync ./dist/ s3://ethscratchies.cmartin.co/",
+    "invalidate:app": "aws cloudfront create-invalidation --distribution-id E209KNEHYHJP46 --paths /index.html",
     "deploy:app": "npm run build:app && npm run invalidate:app"
   },
   "repository": {
@@ -33,6 +33,7 @@
     "@babel/preset-env": "^7.4.5",
     "@babel/preset-react": "^7.0.0",
     "babel-loader": "^8.0.6",
+    "clean-webpack-plugin": "^3.0.0",
     "css-loader": "^3.0.0",
     "dotenv-cli": "^2.0.0",
     "html-webpack-plugin": "^3.2.0",

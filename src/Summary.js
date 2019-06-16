@@ -64,7 +64,8 @@ class Summary extends Component {
             isMiningTicket,
             isMiningPrize,
             currentBlockNumber,
-            hideMiningStatus
+            hideMiningStatus,
+            etherscanLink
         } = this.props;
         const {
             donation
@@ -258,6 +259,7 @@ class Summary extends Component {
                     Prize verification relies on data that is unavailable past a certain point.
                     We are working towards tickets that live forever.
                 </Alert>
+                <Button variant="info" block target="_blank" href={etherscanLink}>View on etherscan</Button>
             </React.Fragment>
         )
     }

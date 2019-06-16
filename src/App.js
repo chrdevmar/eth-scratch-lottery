@@ -114,6 +114,17 @@ class App extends Component {
             const [account] = await web3.eth.getAccounts();
             const jackpot = await scratchLottery.jackpot();
             const currentBlockNumber = await web3.eth.getBlockNumber();
+            let etherscanLink = `etherscan.io/address/${scratchLottery.address}`
+            const networkName = await web3.eth.net.getNetworkType();
+            switch(networkName) {
+                case 'ropsten':
+                    etherscanLink = `https://ropsten.${etherscanLink}`;
+                    break;
+                default:
+                    etherscanLink = `https://${etherscanLink}`;
+                    break;
+            }
+
             const ticket = await scratchLottery.getTicket({
                 from: account
             });
@@ -123,6 +134,7 @@ class App extends Component {
                 ticket,
                 account,
                 currentBlockNumber,
+                etherscanLink,
                 jackpot: web3.utils.fromWei(jackpot),
                 ticketLoaded: true
             });
@@ -180,7 +192,8 @@ class App extends Component {
             ticketLoaded,
             isMiningPrize,
             isMiningTicket,
-            currentBlockNumber
+            currentBlockNumber,
+            etherscanLink
         } = this.state;
         return (
             <React.Fragment>
@@ -230,6 +243,7 @@ class App extends Component {
                                     donateToOwner={this.donateToOwner}
                                     currentBlockNumber={currentBlockNumber}
                                     hideMiningStatus={this.hideMiningStatus}
+                                    etherscanLink={etherscanLink}
                                 />,
                                 document.getElementById('stats')
                             )}
